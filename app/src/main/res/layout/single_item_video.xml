@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<!--
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/go_to_video"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/general_vertical_margin"
+        android:layout_marginBottom="@dimen/general_vertical_margin"
+        android:layout_centerInParent="true"
+        android:background="@drawable/ic_call_made_black_24dp"/>-->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:layout_weight="4"
+        android:id="@+id/single_video"
+        android:textSize="@dimen/movie_add_details_height"
+        android:layout_marginTop="@dimen/general_vertical_margin"
+        android:layout_marginBottom="@dimen/general_vertical_margin"
+        android:layout_centerInParent="true"/>
+
+</LinearLayout>

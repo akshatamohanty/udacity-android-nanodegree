@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.android.akshatamohanty.popularmovies.MainActivity">
+
+    <item
+        android:id="@+id/menu_toprated"
+        android:title="@string/menu_toprated"
+        android:orderInCategory="1"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_popular"
+        android:title="@string/menu_popular"
+        android:orderInCategory="1"
+        app:showAsAction="never"/>
+
+
+
+    <item
+        android:id="@+id/menu_saved"
+        android:title="@string/menu_saved"
+        android:orderInCategory="1"
+        app:showAsAction="never"/>
+
+</menu>
