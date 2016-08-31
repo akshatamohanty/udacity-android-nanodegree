@@ -92,7 +92,7 @@ public class MovieAdapter extends CursorRecyclerViewAdapter<MovieAdapter.ViewHol
     }
 
     public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor){
-        // do nothing
+
     }
 
     @Override
@@ -101,7 +101,7 @@ public class MovieAdapter extends CursorRecyclerViewAdapter<MovieAdapter.ViewHol
         String movie_poster = "poster_path";
         JSONObject movie;
 
-        holder.itemView.setSelected(selectedPos == position);
+        //holder.itemView.setSelected(selectedPos == position);
 
         try {
 
@@ -116,6 +116,8 @@ public class MovieAdapter extends CursorRecyclerViewAdapter<MovieAdapter.ViewHol
                     .load(baseURL.concat(size).concat(pictureURL))
                     .into(holder.movie_poster);
 
+            //Log.v(LOG_TAG, String.valueOf(position));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -126,8 +128,14 @@ public class MovieAdapter extends CursorRecyclerViewAdapter<MovieAdapter.ViewHol
         JSONObject movieInfo = new JSONObject();
         Cursor cursor = this.getCursor();
 
-        if(cursor!=null && cursor.isClosed() != true && cursor.getCount()!= 0 && cursor.moveToPosition(position) != false) {
-            // Load data from dataCursor and return it...
+        if(cursor == null || cursor.isClosed() || cursor.getCount() == 0){
+            Log.v(LOG_TAG, "Cursor is null, closed or with no items in Adapter");
+            return null;
+        }
+        else{
+
+            cursor.moveToPosition(position);
+
             try
             {
                 int did = cursor.getColumnIndexOrThrow(MovieContract.MovieEntry.COLUMN_NAME_MOVIE_ID);
@@ -151,20 +159,16 @@ public class MovieAdapter extends CursorRecyclerViewAdapter<MovieAdapter.ViewHol
 
             return movieInfo;
         }
-        else{
-            Log.e(LOG_TAG, "Cursor is null or count 0 in Adapter");
-            return null;
-        }
 
     }
 
-    @Override
+/*    @Override
     public int getItemCount(){
 
        if(getCursor() == null || getCursor().isClosed())
            return 0;
        else
            return getCursor().getCount();
-    }
+    }*/
 
 }

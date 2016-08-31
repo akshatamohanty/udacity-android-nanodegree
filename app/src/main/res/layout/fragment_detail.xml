@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ScrollView
         android:layout_width="fill_parent"
@@ -22,7 +24,7 @@
             <!-- Movie Title Bar -->
             <TextView
                 android:id="@+id/movie_title"
-                android:text="@string/LoremIpsum"
+                tools:text="@string/LoremIpsum"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
@@ -57,7 +59,7 @@
             <!-- Movie Rating -->
             <TextView
                 android:id="@+id/movie_rating"
-                android:text="@string/LoremIpsum"
+                tools:text="@string/LoremIpsum"
                 android:layout_width="@dimen/details_width"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/movie_title"
@@ -71,7 +73,7 @@
             <!-- Movie Release Date -->
             <TextView
                 android:id="@+id/movie_releaseDate"
-                android:text="@string/LoremIpsum"
+                tools:text="@string/LoremIpsum"
                 android:layout_width="@dimen/details_width"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -84,7 +86,7 @@
             <!-- Movie Plot -->
             <TextView
                 android:id="@+id/movie_plotsynopsis"
-                android:text="@string/LoremIpsum"
+                tools:text="@string/LoremIpsum"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/movie_poster"

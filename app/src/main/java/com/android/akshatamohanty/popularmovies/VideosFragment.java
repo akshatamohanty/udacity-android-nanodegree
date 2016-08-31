@@ -49,6 +49,10 @@ public class VideosFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_videos, container, false);
     }
 
+    public static Uri getYoutubeURL(String key){
+        return Uri.parse("https://www.youtube.com/watch?v=" + key);
+    }
+
     public void update(ArrayList<JSONObject> list) throws JSONException {
 
         //Log.v(LOG_TAG, "Videos Update called");
@@ -69,13 +73,23 @@ public class VideosFragment extends Fragment {
                 final TextView textView = (TextView) child.findViewById(R.id.single_video);
                 textView.setText(list.get(i).getString("name"));
 
-                final String url = "https://www.youtube.com/watch?v=" + list.get(i).getString("key");
+                final Uri url = this.getYoutubeURL(list.get(i).getString("key"));
+                //"https://www.youtube.com/watch?v=" + list.get(i).getString("key");
 
                 //final ImageButton button = (ImageButton) child.findViewById(R.id.go_to_video);
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        Intent sendIntent = new Intent(Intent.ACTION_VIEW, url);
+
+                        String title = getResources().getString(R.string.video_chooser_title);
+                        // Create intent to show the chooser dialog
+                        Intent chooser = Intent.createChooser(sendIntent, title);
+
+                        // Verify the original intent will resolve to at least one activity
+                        if (sendIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                            startActivity(chooser);
+                        }
                     }
                 });
 

@@ -3,17 +3,23 @@ package com.android.akshatamohanty.popularmovies;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Movie;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.support.v7.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +45,9 @@ import java.util.Set;
 public class DetailActivityFragment extends Fragment{
 
     final String LOG_TAG = this.getClass().getSimpleName();
+    private ShareActionProvider mShareActionProvider;
+    private Intent shareIntent = new Intent(Intent.ACTION_SEND);
+    JSONObject mInfo;
 
     public DetailActivityFragment(){
 
@@ -60,13 +69,45 @@ public class DetailActivityFragment extends Fragment{
 
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-          return inflater.inflate(R.layout.fragment_detail, container, false);
+        return inflater.inflate(R.layout.fragment_detail, container, false);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_detail, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.share_movie_details);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+        setShareIntent();
+
+    }
+
+    // Call to update the share intent
+    private void setShareIntent() {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+            Log.v(LOG_TAG, "Intent Updated");
+        }
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void updateUI(){
@@ -84,10 +125,11 @@ public class DetailActivityFragment extends Fragment{
             updateUI( movieInfo );
     }
 
-    public void updateUI(JSONObject movieInfo){
+    public void updateUI(final JSONObject movieInfo){
 
         if(movieInfo == null && getView() != null){
             getView().setVisibility(View.GONE);
+            Log.v(LOG_TAG, "No movies to display - Setting details fragment to invisible");
             return;
         }
 
@@ -95,13 +137,13 @@ public class DetailActivityFragment extends Fragment{
 
             getView().setVisibility(View.VISIBLE);
 
+            mInfo = movieInfo;
+
             TextView movie_title =  (TextView) getView().findViewById(R.id.movie_title);
             TextView movie_plotsynopsis =  (TextView) getView().findViewById(R.id.movie_plotsynopsis);
             TextView movie_rating =  (TextView) getView().findViewById(R.id.movie_rating);
             TextView movie_releaseDate =  (TextView) getView().findViewById(R.id.movie_releaseDate);
             ImageView movie_poster =  (ImageView) getView().findViewById(R.id.movie_poster);
-
-            Button save_button =  (Button) getActivity().findViewById(R.id.save);
 
             final String id = movieInfo.getString(getString(R.string.movie_id));
             final String title = movieInfo.getString(getString(R.string.movie_title));
@@ -120,27 +162,9 @@ public class DetailActivityFragment extends Fragment{
 
             Picasso.with(getActivity()).load(baseURL.concat(size).concat(poster)).into(movie_poster);
 
-            save_button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-
-                    ContentResolver mResolver = getActivity().getContentResolver();
-                    Uri uri = MovieContract.buildUriForSaved();
-
-                    // Save the movie
-                    ContentValues movie_values = new ContentValues();
-                    movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_MOVIE_ID, id );
-                    movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_TITLE, title );
-                    movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_SYNOPSIS, synopsis );
-                    movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_POSTER, poster ) ;
-                    movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_RATING, rating  );
-                    movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_RELEASE, release );
-
-                    mResolver.insert(uri, movie_values);
-
-                    Toast.makeText( getActivity().getBaseContext(), title + " Saved!",
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
+            // This will check the status of the movie (saved or unsaved) and attach corresponding listener to button
+            ConfigureButton btnTask = new ConfigureButton();
+            btnTask.execute();
 
             AdditionalDetails videosTsk = new AdditionalDetails();
             AdditionalDetails reviewsTsk = new AdditionalDetails();
@@ -187,6 +211,12 @@ public class DetailActivityFragment extends Fragment{
                 else
                     Log.v(LOG_TAG, "Videos fragment is absent");
 
+                // update shareIntent to share the first movie video
+
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, VideosFragment.getYoutubeURL(list.get(0).getString("key")).toString());
+
+                setShareIntent();
             }
         }
 
@@ -274,5 +304,173 @@ public class DetailActivityFragment extends Fragment{
         }
     }
 
+
+    /*
+     * Classes for Database Manipulations
+     */
+    private class ConfigureButton extends AsyncTask<Void, Void, Boolean>{
+
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try{
+
+                String title = mInfo.getString(getString(R.string.movie_title));
+
+                ContentResolver mResolver = getActivity().getContentResolver();
+                Uri getMovieDetails = MovieContract.buildUriForSavedMovieDetails(title);
+
+                Cursor cursor = mResolver.query(getMovieDetails, null, null, null, null);
+
+                if(cursor.getCount()>0){
+                    cursor.close();
+                    return true;
+                }
+                else{
+                    cursor.close();
+                    return false;
+                }
+            }
+            catch(JSONException e){
+
+            }
+
+            //default
+            return false;
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+            Button action_button =  (Button) getActivity().findViewById(R.id.save);
+
+            if(result){
+                action_button.setText(R.string.delete_label);
+                action_button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        DeleteMovie dbTsk = new DeleteMovie();
+                        dbTsk.execute();
+
+                    }
+                });
+            }
+            else{
+                action_button.setText(R.string.save_label);
+                action_button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        SaveMovie dbTsk = new SaveMovie();
+                        dbTsk.execute();
+                    }
+                });
+            }
+
+        }
+    }
+
+
+    private class SaveMovie extends AsyncTask<Void, Void, Boolean>{
+
+        String title="";
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try{
+                String id = mInfo.getString(getString(R.string.movie_id));
+                title = mInfo.getString(getString(R.string.movie_title));
+                String synopsis = mInfo.getString(getString(R.string.movie_plot));
+                String rating = mInfo.getString(getString(R.string.movie_rating));
+                String release = mInfo.getString(getString(R.string.movie_release));
+                String poster = mInfo.getString(getString(R.string.movie_poster));
+
+
+                ContentResolver mResolver = getActivity().getContentResolver();
+
+                Uri uri = MovieContract.buildUriForSaved();
+
+
+                ContentValues movie_values = new ContentValues();
+                movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_MOVIE_ID, id);
+                movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_TITLE, title );
+                movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_SYNOPSIS, synopsis );
+                movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_POSTER, poster ) ;
+                movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_RATING, rating );
+                movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_RELEASE, release );
+
+                if( mResolver.insert(uri, movie_values) != null ){
+                    return true;
+                }
+
+            }
+            catch(JSONException e){
+                Log.v(LOG_TAG, "JSON-Exception");
+            }
+
+            return false;
+
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+            if(result){
+                ConfigureButton btnTask = new ConfigureButton();
+                btnTask.execute();
+                Toast.makeText( getActivity().getBaseContext(),
+                        String.format(getResources().getString(R.string.success_string_save), title),
+                        Toast.LENGTH_SHORT).show();
+            }
+            else
+                Toast.makeText( getActivity().getBaseContext(),
+                        String.format(getResources().getString(R.string.error_string_save), title),
+                        Toast.LENGTH_SHORT).show();
+
+        }
+
+
+    }
+
+    private class DeleteMovie extends AsyncTask<Void, Void, Boolean>{
+
+        String title = "";
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try{
+
+                title = mInfo.getString(getString(R.string.movie_title));
+
+                ContentResolver mResolver = getActivity().getContentResolver();
+
+                Uri uri = MovieContract.buildUriForSavedMovieDetails(title);
+
+                mResolver.delete(uri, null, null);
+
+                return true;
+            }
+            catch(JSONException e){
+                Log.v(LOG_TAG, "JSON-Exception");
+            }
+
+            return false;
+
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+            if(result){
+                ConfigureButton btnTask = new ConfigureButton();
+                btnTask.execute();
+                Toast.makeText( getActivity().getBaseContext(),
+                        String.format(getResources().getString(R.string.success_string_delete), title),
+                        Toast.LENGTH_SHORT).show();
+            }
+            else
+                Toast.makeText( getActivity().getBaseContext(),
+                        String.format(getResources().getString(R.string.error_string_delete), title),
+                        Toast.LENGTH_SHORT).show();
+
+        }
+
+    }
 
 }

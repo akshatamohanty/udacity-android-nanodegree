@@ -1,5 +1,6 @@
 package com.android.akshatamohanty.popularmovies;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -14,6 +15,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.UiThread;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,6 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ProgressBar;
 
 import com.android.akshatamohanty.popularmovies.data.MovieContract;
 import com.android.akshatamohanty.popularmovies.adapter.MovieAdapter;
@@ -61,8 +65,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         setHasOptionsMenu(true);
 
-        syncData();
-
         View displayFrag = getActivity().findViewById(R.id.fragment_details);
         if(displayFrag != null) {
             mDualPane = true;
@@ -73,9 +75,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             mLayoutManager = new GridLayoutManager(mContext, 2);
         }
 
-        // initialize the loader
-        getLoaderManager().initLoader(optSelected, null, this);
-
         // Recycler View Adapter Implementation
         mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
@@ -84,6 +83,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         mAdapter = new MovieAdapter(mContext, null);
         mAdapter.setCallback( this );
         mRecyclerView.setAdapter(mAdapter);
+
+
+        // initialize the loader
+        getLoaderManager().initLoader(optSelected, null, this);
+
     }
 
     @Override
@@ -96,6 +100,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             optSelected = savedInstanceState.getInt("optSelected");
             movieSelected = savedInstanceState.getInt("movieSelected");
         }
+
+
     }
 
     @Override
@@ -129,6 +135,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 break;
         }
 
+        ProgressBar progressBar = (ProgressBar) getActivity().findViewById(R.id.progress_spinner);
+        progressBar.setVisibility(View.VISIBLE);
+
         getLoaderManager().restartLoader(optSelected, null, this);
 
         return super.onOptionsItemSelected(item);
@@ -161,22 +170,36 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 break;
         }
 
-        return new CursorLoader(getActivity(), contentURI, null, null, null, null);
+        Log.v(LOG_TAG, "onCreateLoader-" +contentURI.toString());
+        Loader loader = new CursorLoader(getActivity(), contentURI, null, null, null, null);
+
+        return loader;
     }
 
     public void onLoadFinished(Loader loader, Cursor data) {
+
         // Change cursor of Adapter to visualize data in RecyclerView
+        Log.v(LOG_TAG, "onLoadFinished old:" + String.valueOf(mAdapter.getItemCount()));
+
         mAdapter.changeCursor(data);
+        mAdapter.notifyDataSetChanged();
+
+        Log.v(LOG_TAG, "onLoadFinished new:" + String.valueOf(mAdapter.getItemCount()));
 
         if ( mDualPane  ) {
 
-            if(data == null || data.isClosed() || data.getCount() == 0)
+            int items = mAdapter.getItemCount();
+            if (items == 0 || items < movieSelected)
                 showDetails(0);
             else
                 showDetails(movieSelected);
         }
 
-        Log.v(LOG_TAG, "Cursor loaded");
+        if(loader.getId() == 3 || mAdapter.getItemCount()>0){
+            ProgressBar progressBar = (ProgressBar) getActivity().findViewById(R.id.progress_spinner);
+            progressBar.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -213,6 +236,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             DetailActivityFragment displayFrag = (DetailActivityFragment) getFragmentManager()
                     .findFragmentById(R.id.fragment_details);
 
+            // updateUI will handle case of movieInfo being null
             displayFrag.updateUI( movieInfo );
         }
     }
@@ -220,27 +244,29 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     /*
      * Syncs data only if data is more than half a day old
      */
-    public void syncData(){
+    public static void syncData(Activity activity){
         final String PREFS_NAME = "updateLogFile";
 
-        SharedPreferences updates = getActivity().getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences updates = activity.getSharedPreferences(PREFS_NAME, 0);
 
         Long today = new Date(System.currentTimeMillis()).getTime();
         Long lastUpdated = updates.getLong("lastUpdate", 0);
 
         // check difference in number of milliseconds between the two updates
         // Half a day - 43200s
-        if ( today - lastUpdated > 43200000) {
+        if (today - lastUpdated > 43200000) {
 
             // Sync when data is outdated
-            Log.v(LOG_TAG, "Sync Called");
-            MovieSyncAdapter.syncImmediately(getActivity());
+            // Log.v(LOG_TAG, "Sync Called");
+            MovieSyncAdapter.syncImmediately( activity );
 
             // record the fact that the app has been started at least once
             updates.edit().putLong("lastUpdate", today).apply();
+            ProgressBar progressBar = (ProgressBar) activity.findViewById(R.id.progress_spinner);
+            progressBar.setVisibility(View.VISIBLE);
         }
         else
-            Log.v(LOG_TAG, "Database already up-to-date");
+            Log.v("MainActivityFragment", "Database already up-to-date");
     }
 
 }

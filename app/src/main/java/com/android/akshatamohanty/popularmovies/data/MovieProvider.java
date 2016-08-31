@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -86,6 +87,14 @@ public class MovieProvider extends ContentProvider {
 
             }
 
+            try{
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                Log.v(LOG_TAG, "Query URI-" + uri.toString());
+            }
+            catch (NullPointerException e){
+                Log.v(LOG_TAG, "Null Pointer Exception at Query");
+            }
+
             return cursor;
         }
 
@@ -99,15 +108,47 @@ public class MovieProvider extends ContentProvider {
 
             String tableName = uri.getLastPathSegment();
 
-            mDBHelper.addMovie(tableName, contentValues);
+            long id = mDBHelper.addMovie(tableName, contentValues);
 
-            return null;
+            if(id <= 0)
+                return null;
+
+            try{
+                getContext().getContentResolver().notifyChange(uri, null);
+            }
+            catch (NullPointerException e){
+                Log.v(LOG_TAG, "Null Pointer Exception at Insert");
+            }
+
+            return uri;
+        }
+
+        public int bulkInsert(Uri uri, ContentValues[] values){
+
+            int numInserted = 0;
+            String tableName = uri.getLastPathSegment();
+
+
+            for (ContentValues cv : values) {
+                SQLiteDatabase db = mDBHelper.getWritableDatabase();
+                if (db.insert(tableName, null, cv) <= -1) {
+                    Log.v(LOG_TAG, "Failed to insert row into " + uri);
+                }
+                else
+                    numInserted++;
+            }
+
+
+            getContext().getContentResolver().notifyChange(uri, null);
+            Log.v(LOG_TAG, "Notifying uri (bulkInsert) - " + uri.toString());
+            return numInserted;
         }
 
         @Override
         public int delete(Uri uri, String s, String[] strings) {
 
             String movieTitle;
+            int result = 0;
 
             switch (uriMatcher.match(uri)) {
 
@@ -133,6 +174,13 @@ public class MovieProvider extends ContentProvider {
                 case SAVED_ITEM:
                     movieTitle = uri.getLastPathSegment();
                     mDBHelper.deleteMovie(MovieContract.TABLE_NAME_SAVED, movieTitle);
+                    try{
+                        Log.v(LOG_TAG, "Notifying uri (delete-savedItem) - " + uri.toString());
+                        getContext().getContentResolver().notifyChange(uri, null);
+                    }
+                    catch (NullPointerException e){
+                        Log.v(LOG_TAG, "Null Pointer Exception at Insert");
+                    }
                     break;
 
                 default:
@@ -145,6 +193,14 @@ public class MovieProvider extends ContentProvider {
 
         @Override
         public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
+
+            try{
+                getContext().getContentResolver().notifyChange(uri, null);
+            }
+            catch (NullPointerException e){
+                Log.v(LOG_TAG, "Null Pointer Exception at Insert");
+            }
+
             return 0;
         }
 

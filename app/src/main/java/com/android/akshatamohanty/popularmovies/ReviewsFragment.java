@@ -81,7 +81,17 @@ public class ReviewsFragment extends Fragment {
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+
+                        Intent sendIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+
+                        String title = getResources().getString(R.string.review_chooser_title);
+                        // Create intent to show the chooser dialog
+                        Intent chooser = Intent.createChooser(sendIntent, title);
+
+                        // Verify the original intent will resolve to at least one activity
+                        if (sendIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                            startActivity(chooser);
+                        }
                     }
                 });
 

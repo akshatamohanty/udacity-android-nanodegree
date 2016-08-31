@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Movie;
 import android.util.Log;
 
 /**
@@ -78,14 +79,14 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     // required CRUD functions
 
     // Add a movie
-    public void addMovie(String tableName, ContentValues values){
+    public long addMovie(String tableName, ContentValues values){
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Inserting Row
-        long id = db.insert(tableName, null, values);
+        //Log.v(LOG_TAG, "Movie Added");
 
-        db.close(); // Closing database connection
+        // Inserting Row
+        return db.insert(tableName, null, values);
     }
 
     // Get all movies
@@ -100,30 +101,30 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    // Get all movies
+    // Get single movie
     public Cursor getMovieDetails(String tableName, String movieTitle){
 
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + tableName;
+        String selectQuery = "SELECT  * FROM " + tableName +
+                " WHERE " + MovieContract.MovieEntry.COLUMN_NAME_TITLE + " = "
+                + "\"" + movieTitle + "\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         //Log.v(LOG_TAG, "detail" + cursor.getString(2) );
-
         return cursor;
     }
 
     // Deleting a movie based on movie title
-    public void deleteMovie(String tableName, String movieTitle){
+    public long deleteMovie(String tableName, String movieTitle){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(tableName, MovieContract.MovieEntry.COLUMN_NAME_TITLE + "=\"" + movieTitle + "\"", null);
-        db.close();
+        return db.delete(tableName, MovieContract.MovieEntry.COLUMN_NAME_TITLE + "=\"" + movieTitle + "\"", null);
     }
 
     public void deleteAllMovies(String tableName){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM "+ tableName);
-        db.close();
+        Log.v(LOG_TAG, "All movies deleted from " + tableName);
     }
 }

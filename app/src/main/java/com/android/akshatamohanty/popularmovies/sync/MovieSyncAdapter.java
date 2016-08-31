@@ -2,6 +2,7 @@ package com.android.akshatamohanty.popularmovies.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -18,6 +19,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.android.akshatamohanty.popularmovies.BuildConfig;
 
@@ -73,7 +76,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
 
         ContentResolver.requestSync(getSyncAccount(context),
-                    context.getString(R.string.content_authority), bundle);
+                context.getString(R.string.content_authority), bundle);
+
     }
 
     /**
@@ -227,6 +231,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         // clear the table
         mResolver.delete(uri, null, null);
 
+        ContentValues[] cv = new ContentValues[movies.length()];
 
         // insert the values
         for(int i=0; i < movies.length(); i++){
@@ -241,9 +246,11 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_RATING, movieInfo.getString("vote_average")  );
             movie_values.put(MovieContract.MovieEntry.COLUMN_NAME_RELEASE, movieInfo.getString("release_date")  );
 
-            mResolver.insert(uri, movie_values);
+            cv[i] = movie_values;
 
         }
+
+        mResolver.bulkInsert(uri, cv);
 
         return true;
     }
