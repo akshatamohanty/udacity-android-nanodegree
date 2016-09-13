@@ -7,6 +7,15 @@
         xmlns:chart="http://schemas.android.com/apk/res-auto"
         android:id="@+id/linechart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/graph_margin"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/no_data_for_graph"
+        android:text="@string/no_data_for_graph"
+        android:layout_margin="@dimen/graph_margin"
+        android:visibility="gone"/>
 
 </FrameLayout>
