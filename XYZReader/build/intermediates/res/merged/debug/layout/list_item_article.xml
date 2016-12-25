@@ -20,6 +20,7 @@
             android:id="@+id/thumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:height="0dp"
             android:background="@color/photo_placeholder" />
 
         <TextView
