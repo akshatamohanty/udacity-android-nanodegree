@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TrackRead</string>
+
+    <string name="network_toast">Please check your internet connection and try again.</string>
+</resources>
