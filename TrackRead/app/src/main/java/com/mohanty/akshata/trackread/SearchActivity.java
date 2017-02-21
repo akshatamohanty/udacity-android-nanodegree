@@ -1,6 +1,7 @@
 package com.mohanty.akshata.trackread;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -12,6 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -69,6 +75,16 @@ public class SearchActivity extends AppCompatActivity {
 
         private final String LOG_TAG = SearchBooksTask.class.getSimpleName();
 
+        private void showResults(JSONArray books){
+            Toast.makeText(mContext, "Result received", Toast.LENGTH_SHORT).show();
+
+            Intent obj_intent = new Intent(SearchActivity.this, SearchResultsActivity.class);
+            Bundle b = new Bundle();
+            b.putString("books", books.toString());
+            obj_intent.putExtras(b);
+            startActivity(obj_intent);
+        }
+
         @Override
         protected String doInBackground(String... searchText) {
 
@@ -111,6 +127,9 @@ public class SearchActivity extends AppCompatActivity {
                 int count = 0;
                 while ((line = reader.readLine()) != null) {
                     count++;
+                    // skip the CDATA lines
+                    if(count == 5 || count == 6 || count == 9)
+                        continue;
                     buffer.append(line);
                 }
 
@@ -119,7 +138,6 @@ public class SearchActivity extends AppCompatActivity {
                 }
 
                 booksStr = buffer.toString();
-                Log.d(LOG_TAG, booksStr.substring( booksStr.length() - 50 ) );
 
                 return booksStr;
 
@@ -138,25 +156,33 @@ public class SearchActivity extends AppCompatActivity {
                         Log.e(LOG_TAG, "Error closing stream", e);
                     }
                 }
-                return null;
             }
         }
 
         @Override
         protected void onPostExecute(String result) {
+
             Log.v(LOG_TAG, "in on post execute");
-            Toast.makeText(mContext, "Result received", Toast.LENGTH_SHORT).show();
 
-            /*JSONObject jsonObj = null;
-            try {
-                jsonObj = XML.toJSONObject(result);
-                Log.d(LOG_TAG, "XML to JSON converted");
-            } catch (JSONException e) {
-                Log.e("JSON exception", e.getMessage());
-                e.printStackTrace();
+            if(result != null && !result.isEmpty() && !result.equals("null")){
+                JSONObject jsonObj = null;
+                try {
+                    jsonObj = XML.toJSONObject(result);
+                    Log.d(LOG_TAG, "XML to JSON converted");
+
+                    JSONArray res = jsonObj.getJSONObject("GoodreadsResponse").getJSONObject("search").getJSONObject("results").getJSONArray("work");
+                    Log.d("JSON", String.valueOf(res.length()) );
+
+                    showResults(res);
+
+                } catch (JSONException e) {
+                    Log.e("JSON exception", e.getMessage());
+                    e.printStackTrace();
+                }
+
             }
-
-            Log.d("JSON", jsonObj.toString());*/
+            else
+                Log.v(LOG_TAG, "Result is null");
         }
     }
 
