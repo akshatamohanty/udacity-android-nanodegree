@@ -5,5 +5,8 @@
     <string name="search_btn_text">Search</string>
     <string name="search_heading">What\'s your current read?</string>
 
+    <string name="menu_statistics">Statistics</string>
+    <string name="menu_addBook">Add a book</string>
+
     <string name="network_toast">Please check your internet connection and try again.</string>
 </resources>

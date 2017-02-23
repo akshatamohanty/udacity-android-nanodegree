@@ -1,40 +1,40 @@
 package com.mohanty.akshata.trackread.data;
 
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.content.UriMatcher;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
 /**
  * Created by Akshata on 21/2/2017.
  */
 
-public class BooksContentProvider {
+public class BooksContentProvider extends ContentProvider {
     String LOG_TAG = this.getClass().getSimpleName();
 
-    private MovieDBHelper mDBHelper;
+    private BooksDBHelper mDBHelper;
 
-    static final int POPULAR = 101;
-    static final int POPULAR_ITEM = 1011;
-    static final int TOP_RATED = 102;
-    static final int TOP_RATED_ITEM = 1021;
-    static final int SAVED = 103;
-    static final int SAVED_ITEM = 1031;
+    static final int ARCHIVED_BOOKS = 101;
+    static final int CURRENT_BOOKS = 102;
 
+    static final int ALL_BOOKS = 103;
+    static final int ALL_BOOKS_ITEM = 1031;
 
     private static final UriMatcher uriMatcher =  new UriMatcher(UriMatcher.NO_MATCH);
     static{
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.TABLE_NAME_POPULAR, POPULAR);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,  MovieContract.TABLE_NAME_POPULAR + "/*", POPULAR_ITEM);
-
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.TABLE_NAME_TOP_RATED, TOP_RATED);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.TABLE_NAME_TOP_RATED + "/*", TOP_RATED_ITEM);
-
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.TABLE_NAME_SAVED, SAVED);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.TABLE_NAME_SAVED + "/*", SAVED_ITEM);
+        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS, ARCHIVED_BOOKS);
+        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS, CURRENT_BOOKS);
+        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS, ALL_BOOKS);
+        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS + "/*", ALL_BOOKS_ITEM);
     }
 
     public boolean onCreate() {
-
         Log.v(LOG_TAG, "Content Provider created.");
-
-        mDBHelper = new MovieDBHelper( getContext() );
-
+        mDBHelper = new BooksDBHelper(getContext());
         return true;
     }
 
@@ -44,32 +44,25 @@ public class BooksContentProvider {
 
         Cursor cursor = null;
 
-        String movieTitle;
+        String bookId;
 
         switch (uriMatcher.match(uri)) {
 
-            case POPULAR:
-                cursor = mDBHelper.getAllMovies(MovieContract.TABLE_NAME_POPULAR);
-                break;
-            case POPULAR_ITEM:
-                movieTitle = uri.getLastPathSegment();
-                cursor = mDBHelper.getMovieDetails(MovieContract.TABLE_NAME_POPULAR, movieTitle);
+            case ARCHIVED_BOOKS:
+                cursor = mDBHelper.getArchivedBooks();
                 break;
 
-            case TOP_RATED:
-                cursor = mDBHelper.getAllMovies(MovieContract.TABLE_NAME_TOP_RATED);
-                break;
-            case TOP_RATED_ITEM:
-                movieTitle = uri.getLastPathSegment();
-                cursor = mDBHelper.getMovieDetails(MovieContract.TABLE_NAME_TOP_RATED, movieTitle);
+            case CURRENT_BOOKS:
+                cursor = mDBHelper.getCurrentBooks();
                 break;
 
-            case SAVED:
-                cursor = mDBHelper.getAllMovies(MovieContract.TABLE_NAME_SAVED);
+            case ALL_BOOKS:
+                cursor = mDBHelper.getAllBooks();
                 break;
-            case SAVED_ITEM:
-                movieTitle = uri.getLastPathSegment();
-                cursor = mDBHelper.getMovieDetails(MovieContract.TABLE_NAME_SAVED, movieTitle);
+
+            case ALL_BOOKS_ITEM:
+                bookId = uri.getLastPathSegment();
+                cursor = mDBHelper.getBookDetails(bookId);
                 break;
 
             default:
@@ -96,9 +89,7 @@ public class BooksContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
 
-        String tableName = uri.getLastPathSegment();
-
-        long id = mDBHelper.addMovie(tableName, contentValues);
+        long id = mDBHelper.addBook(contentValues);
 
         if(id <= 0)
             return null;
@@ -137,33 +128,14 @@ public class BooksContentProvider {
     @Override
     public int delete(Uri uri, String s, String[] strings) {
 
-        String movieTitle;
-        int result = 0;
+        String bookId;
 
         switch (uriMatcher.match(uri)) {
 
-            case POPULAR:
-                mDBHelper.deleteAllMovies(MovieContract.TABLE_NAME_POPULAR);
-                break;
-            case POPULAR_ITEM:
-                movieTitle = uri.getLastPathSegment();
-                mDBHelper.deleteMovie(MovieContract.TABLE_NAME_POPULAR, movieTitle);
-                break;
+            case ALL_BOOKS_ITEM:
+                bookId = uri.getLastPathSegment();
+                mDBHelper.deleteBook(bookId);
 
-            case TOP_RATED:
-                mDBHelper.deleteAllMovies(MovieContract.TABLE_NAME_TOP_RATED);
-                break;
-            case TOP_RATED_ITEM:
-                movieTitle = uri.getLastPathSegment();
-                mDBHelper.deleteMovie(MovieContract.TABLE_NAME_TOP_RATED, movieTitle);
-                break;
-
-            case SAVED:
-                mDBHelper.deleteAllMovies(MovieContract.TABLE_NAME_SAVED);
-                break;
-            case SAVED_ITEM:
-                movieTitle = uri.getLastPathSegment();
-                mDBHelper.deleteMovie(MovieContract.TABLE_NAME_SAVED, movieTitle);
                 try{
                     Log.v(LOG_TAG, "Notifying uri (delete-savedItem) - " + uri.toString());
                     getContext().getContentResolver().notifyChange(uri, null);

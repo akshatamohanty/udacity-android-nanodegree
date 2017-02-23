@@ -1,8 +1,11 @@
 package com.mohanty.akshata.trackread.data;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteTransactionListener;
+import android.util.Log;
 
 /**
  * Created by Akshata on 21/2/2017.
@@ -13,7 +16,7 @@ public class BooksDBHelper extends SQLiteOpenHelper{
     String LOG_TAG = this.getClass().getSimpleName();
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "Movies.db";
+    public static final String DATABASE_NAME = "Books.db";
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String COMMA_SEP = ",";
@@ -21,15 +24,15 @@ public class BooksDBHelper extends SQLiteOpenHelper{
     private String createTable(String tableName){
 
         String SQLEntry =  "CREATE TABLE " + tableName + " (" +
-                MovieContract.MovieEntry._ID + " INTEGER PRIMARY KEY," +
-                MovieContract.MovieEntry.COLUMN_NAME_MOVIE_ID + TEXT_TYPE + " UNIQUE " + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_TITLE + TEXT_TYPE + " UNIQUE " + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_SYNOPSIS + TEXT_TYPE + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_POSTER + TEXT_TYPE + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_RATING + TEXT_TYPE + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_RELEASE + TEXT_TYPE + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_VIDEOS + TEXT_TYPE + COMMA_SEP +
-                MovieContract.MovieEntry.COLUMN_NAME_REVIEWS + TEXT_TYPE + " )";
+                BooksContract.BookEntry._ID + " INTEGER PRIMARY KEY," +
+                BooksContract.BookEntry.COLUMN_NAME_BOOK_ID + TEXT_TYPE + " UNIQUE " + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_TITLE + TEXT_TYPE + " UNIQUE " + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_AUTHOR + TEXT_TYPE + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_DATE_ADDED + TEXT_TYPE + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_STATUS + TEXT_TYPE + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_TOTAL_PAGES + TEXT_TYPE + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_CURRENT_PAGE + TEXT_TYPE + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_NOTES + TEXT_TYPE + " )";
 
         return SQLEntry;
 
@@ -41,29 +44,21 @@ public class BooksDBHelper extends SQLiteOpenHelper{
         return  SQL_DELETE_ENTRIES;
     }
 
-
-
-    public MovieDBHelper(Context context) {
+    public BooksDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     public void onCreate(SQLiteDatabase db) {
-
-        // create three tables to store three kinds of movies
-        db.execSQL( createTable(MovieContract.TABLE_NAME_POPULAR) );
-        db.execSQL( createTable(MovieContract.TABLE_NAME_TOP_RATED) );
-        db.execSQL( createTable(MovieContract.TABLE_NAME_SAVED) );
-
-        Log.v(LOG_TAG, "Database tables created");
+        // create table to store books
+        db.execSQL( createTable(BooksContract.TABLE_NAME_BOOKS) );
+        Log.v(LOG_TAG, "Database table created");
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
-        db.execSQL(dropTable(MovieContract.TABLE_NAME_TOP_RATED));
-        db.execSQL(dropTable(MovieContract.TABLE_NAME_POPULAR));
-        db.execSQL(dropTable(MovieContract.TABLE_NAME_SAVED));
+        db.execSQL(dropTable(BooksContract.TABLE_NAME_BOOKS));
 
         onCreate(db);
     }
@@ -75,59 +70,74 @@ public class BooksDBHelper extends SQLiteOpenHelper{
     // required CRUD functions
 
     // Add a movie
-    public long addMovie(String tableName, ContentValues values){
+    public long addBook(ContentValues values){
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        //Log.v(LOG_TAG, "Movie Added");
-
         // Inserting Row
-        return db.insert(tableName, null, values);
+        return db.insert(BooksContract.TABLE_NAME_BOOKS, null, values);
     }
 
-    // Get all movies
-    public Cursor getAllMovies(String tableName){
+    // Get all books
+    public Cursor getAllBooks(){
 
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + tableName;
+        String selectQuery = "SELECT  * FROM " + BooksContract.TABLE_NAME_BOOKS;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         return cursor;
+    }
+
+    // get all books with status true (current)
+    private Cursor getBooksByStatusCode(int status){
+
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + BooksContract.TABLE_NAME_BOOKS +
+                " WHERE " + BooksContract.BookEntry.COLUMN_NAME_STATUS + " = "
+                + "\"" + String.valueOf(status) + "\"";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        return cursor;
+    }
+
+    public Cursor getArchivedBooks(){
+        return getBooksByStatusCode(BooksContract.STATUS_ARCHIVED);
+    }
+
+    public Cursor getCurrentBooks(){
+        return getBooksByStatusCode(BooksContract.STATUS_CURRENT);
     }
 
     // Get single movie
-    public Cursor getMovieDetails(String tableName, String movieTitle){
+    public Cursor getBookDetails(String bookId){
 
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + tableName +
-                " WHERE " + MovieContract.MovieEntry.COLUMN_NAME_TITLE + " = "
-                + "\"" + movieTitle + "\"";
+        String selectQuery = "SELECT  * FROM " + BooksContract.TABLE_NAME_BOOKS +
+                " WHERE " + BooksContract.BookEntry.COLUMN_NAME_BOOK_ID + " = "
+                + "\"" + bookId + "\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        //Log.v(LOG_TAG, "detail" + cursor.getString(2) );
         return cursor;
     }
 
-    // Deleting a movie based on movie title
-    public long deleteMovie(String tableName, String movieTitle){
+    // Deleting a book based on book id
+    public long deleteBook(String bookId){
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(tableName, MovieContract.MovieEntry.COLUMN_NAME_TITLE + "=\"" + movieTitle + "\"", null);
+        return db.delete(BooksContract.TABLE_NAME_BOOKS, BooksContract.BookEntry.COLUMN_NAME_BOOK_ID + "=\"" + bookId + "\"", null);
     }
 
-    public void deleteAllMovies(String tableName){
+    // delete all books
+    public void deleteAllBooks(String tableName){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM "+ tableName);
-        Log.v(LOG_TAG, "All movies deleted from " + tableName);
+        Log.v(LOG_TAG, "All books deleted from " + tableName);
     }
 
-
-    @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
-
-    }
 }
 
