@@ -28,6 +28,7 @@ public class BooksDBHelper extends SQLiteOpenHelper{
                 BooksContract.BookEntry.COLUMN_NAME_BOOK_ID + TEXT_TYPE + " UNIQUE " + COMMA_SEP +
                 BooksContract.BookEntry.COLUMN_NAME_TITLE + TEXT_TYPE + " UNIQUE " + COMMA_SEP +
                 BooksContract.BookEntry.COLUMN_NAME_AUTHOR + TEXT_TYPE + COMMA_SEP +
+                BooksContract.BookEntry.COLUMN_NAME_IMAGE + TEXT_TYPE + COMMA_SEP +
                 BooksContract.BookEntry.COLUMN_NAME_DATE_ADDED + TEXT_TYPE + COMMA_SEP +
                 BooksContract.BookEntry.COLUMN_NAME_STATUS + TEXT_TYPE + COMMA_SEP +
                 BooksContract.BookEntry.COLUMN_NAME_TOTAL_PAGES + TEXT_TYPE + COMMA_SEP +

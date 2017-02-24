@@ -1,24 +1,32 @@
 package com.mohanty.akshata.trackread;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import com.mohanty.akshata.trackread.data.BooksContract;
+
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
     private static final int NUM_PAGES = 5;
+    private static String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -46,12 +54,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Toast.makeText(getApplicationContext(), "track read main" , Toast.LENGTH_LONG).show();
-
         // Instantiate a ViewPager and a PagerAdapter.
         mPager = (ViewPager) findViewById(R.id.pager);
         mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
+
+        getSupportLoaderManager().initLoader(0, null, this );
     }
 
     @Override
@@ -76,6 +84,48 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public Loader onCreateLoader(int i, Bundle bundle) {
+
+        Uri contentURI;
+        switch(i){
+            case 0:
+                contentURI = BooksContract.buildUrlForTable();
+                break;
+            default:
+                contentURI = BooksContract.buildUrlForTable();
+                break;
+        }
+
+        Log.v(LOG_TAG, "onCreateLoader-" +contentURI.toString());
+        Loader loader = new CursorLoader(this, contentURI, null, null, null, null);
+
+        return loader;
+    }
+
+    public void onLoadFinished(Loader loader, Cursor data) {
+
+        // Change cursor of Adapter to visualize data in RecyclerView
+        //Log.v(LOG_TAG, "onLoadFinished old:" + String.valueOf(mPagerAdapter.getItemCount()));
+
+        //mPagerAdapter.changeCursor(data);
+        //mPagerAdapter.notifyDataSetChanged();
+
+        Log.v(LOG_TAG, "onLoadFinished new:" + String.valueOf(data.getCount()));
+
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+        //mPagerAdapter.changeCursor(null);
+    }
+
     /**
      * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
      * sequence.
@@ -84,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
+        Cursor cursor;
 
         @Override
         public Fragment getItem(int position) {
@@ -94,6 +146,12 @@ public class MainActivity extends AppCompatActivity {
         public int getCount() {
             return NUM_PAGES;
         }
+
+        public void changeCursor(Cursor data){
+            cursor = data;
+        }
+
+        public int getItemCount(){ return cursor.getCount(); };
     }
 
 

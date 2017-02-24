@@ -26,6 +26,7 @@ public final class BooksContract {
         public static final String COLUMN_NAME_BOOK_ID = "movie_id";
         public static final String COLUMN_NAME_TITLE = "title";
         public static final String COLUMN_NAME_AUTHOR = "author";
+        public static final String COLUMN_NAME_IMAGE = "image";
         public static final String COLUMN_NAME_DATE_ADDED = "date";
         public static final String COLUMN_NAME_TOTAL_PAGES = "total";
         public static final String COLUMN_NAME_CURRENT_PAGE = "current";
@@ -35,7 +36,7 @@ public final class BooksContract {
     }
 
     // Helper functions for Uri building
-    public static final Uri buildUriForPopular(){
+    public static final Uri buildUrlForTable(){
         return BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME_BOOKS).build();
     }
 

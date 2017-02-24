@@ -13,8 +13,8 @@ android {
     }
 
     buildTypes.each{
-        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_KEY', "\"--dev--key--\""
-        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_SECRET', "\"--dev--secret--\""
+        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_KEY', "\"\""
+        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_SECRET', "\"\""
     }
 
     buildTypes {
