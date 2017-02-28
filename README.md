@@ -6,19 +6,20 @@ An app to keep track of your current reads and make notes
 This project uses the Goodreads API and will require the Goodreads Developer and Secret key. These maybe acquired from - https://www.goodreads.com/api/keys
 
 In build.gradle file at the app level, a Goodreads Developer and Secret key will need to be added in place of the dummy-strings
+        
         it.buildConfigField 'String', 'GOODREADS_DEVELOPER_KEY', "\"--dummy-dev-key--\""
         it.buildConfigField 'String', 'GOODREADS_DEVELOPER_SECRET', "\"-dummy-secret-key--\""
 
 
 # Activities
  
-## Main Activity
+### Main Activity
 Displays your current reads along with your notes using a ViewPager
 
-## Search & Search Results Activity
+### Search & Search Results Activity
 Used to search for your books and add them to your current reads
 
-## Archives (Statistics Activity)
+### Archives (Statistics Activity)
 Used to store books that have been completed
 
 
