@@ -7,14 +7,28 @@ tools:context="com.mohanty.akshata.trackread.MainActivity">
     <item
         android:id="@+id/menu_addbook"
         android:title="@string/menu_addBook"
-        android:icon="@android:drawable/ic_menu_add"
+        android:contentDescription="@string/menu_addBook"
         android:orderInCategory="1"
-        app:showAsAction="always"/>
+        android:nextFocusUp="@+id/menu_archive"
+        android:nextFocusDown="@+id/menu_statistics"/>
 
     <item
         android:id="@+id/menu_statistics"
         android:title="@string/menu_statistics"
-        android:orderInCategory="1"
-        app:showAsAction="never"/>
+        android:contentDescription="@string/menu_statistics"
+        android:orderInCategory="2"
+        app:showAsAction="never"
+        android:nextFocusUp="@+id/menu_addbook"
+        android:nextFocusDown="@+id/menu_archive"
+        />
+
+    <item
+        android:id="@+id/menu_archive"
+        android:title="@string/menu_archive"
+        android:contentDescription="@string/menu_archive"
+        android:orderInCategory="3"
+        app:showAsAction="never"
+        android:nextFocusUp="@+id/menu_statistics"
+        android:nextFocusDown="@+id/menu_addbook"/>
 
 </menu>

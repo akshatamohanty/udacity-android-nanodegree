@@ -1,26 +1,43 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+// keystore.properties file, in the rootProject folder.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+// Initialize a new Properties() object called keystoreProperties.
+def keystoreProperties = new Properties()
+
+// Load your keystore.properties file into the keystoreProperties object.
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
+    signingConfigs {
+        config {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.1"
     defaultConfig {
         applicationId "com.mohanty.akshata.trackread"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-
-    buildTypes.each{
-        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_KEY', "\"\""
-        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_SECRET', "\"\""
+    buildTypes.each {
+        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_KEY', "\"--dummy-dev-key--\""
+        it.buildConfigField 'String', 'GOODREADS_DEVELOPER_SECRET', "\"--dummy-secret-key--\""
     }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
 
         }
     }
@@ -31,8 +48,12 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:support-v4:25.+'
-    testCompile 'junit:junit:4.12'
     compile project(':java-json')
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:support-v4:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.google.android.gms:play-services-analytics:9.0.0'
+    compile 'com.google.android.gms:play-services-ads:9.0.0'
+    testCompile 'junit:junit:4.12'
 }

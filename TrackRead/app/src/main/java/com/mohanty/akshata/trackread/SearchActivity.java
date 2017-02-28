@@ -8,11 +8,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,13 +34,30 @@ import java.net.URL;
 
 public class SearchActivity extends AppCompatActivity {
 
+    private String LOG_TAG = SearchActivity.class.getSimpleName();
+
     private Context mContext;
     private Boolean isConnected;
 
+    private String searchtxt;
+
+    Tracker mTracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        // If the screen is rotated, the movies shouldn't change
+        if(savedInstanceState != null){
+            searchtxt = savedInstanceState.getString("searchText");
+            EditText searchText = (EditText) findViewById(R.id.searchText);
+            searchText.setText(searchtxt);
+        }
+
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
 
         mContext = this;
         ConnectivityManager cm =
@@ -46,6 +67,11 @@ public class SearchActivity extends AppCompatActivity {
         isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // attach click functionality to the button
         Button search = (Button) findViewById(R.id.searchButton);
@@ -55,9 +81,14 @@ public class SearchActivity extends AppCompatActivity {
                 if (isConnected) {
 
                     EditText searchText = (EditText) findViewById(R.id.searchText);
-                    //Toast.makeText(mContext, searchText.getText(), Toast.LENGTH_SHORT).show();
-                    SearchBooksTask books = new SearchBooksTask();
-                    books.execute(searchText.getText().toString());
+                    searchtxt = searchText.getText().toString();
+                    if(searchtxt != null && !searchtxt.isEmpty()){
+                        SearchBooksTask books = new SearchBooksTask();
+                        books.execute(searchtxt.toString());
+                    }
+                    else{
+                        Toast.makeText(mContext, R.string.error_message, Toast.LENGTH_SHORT).show();
+                    }
 
                 } else {
                     networkToast();
@@ -67,10 +98,37 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
+    // network toast to display if no net connectivity
     public void networkToast(){
         Toast.makeText(mContext, getString(R.string.network_toast), Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+        outState.putString("searchText", searchtxt);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //Log.i(LOG_TAG, "Setting screen name: " + LOG_TAG);
+        mTracker.setScreenName("Image~" + LOG_TAG);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    // Async Task to fetch search data
     private class SearchBooksTask extends AsyncTask<String, Void, String>{
 
         private final String LOG_TAG = SearchBooksTask.class.getSimpleName();
@@ -95,8 +153,8 @@ public class SearchActivity extends AppCompatActivity {
 
             try {
 
-                final String GOODREADS_BASE_URL =
-                        "https://www.goodreads.com/search/index.xml";
+                final String GOODREADS_BASE_URL = getResources().getString(R.string.goodreads_url);
+
                 final String APPID_PARAM = "key";
                 final String SEARCH_PARAM = "q";
 
@@ -177,12 +235,14 @@ public class SearchActivity extends AppCompatActivity {
 
                 } catch (JSONException e) {
                     Log.e("JSON exception", e.getMessage());
+                    Toast.makeText(mContext, R.string.error_message, Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
 
             }
-            else
+            else{
                 Log.v(LOG_TAG, "Result is null");
+            }
         }
     }
 

@@ -18,6 +18,9 @@ public final class BooksContract {
     public static final int STATUS_CURRENT = 1;
     public static final int STATUS_SAVED = 2;
 
+    public static final String STATUS_ARCHIVED_STRING = "archived";
+    public static final String STATUS_CURRENT_STRING = "current";
+
     public BooksContract() {}
 
     /* Inner classes that defines the table contents */
@@ -38,6 +41,14 @@ public final class BooksContract {
     // Helper functions for Uri building
     public static final Uri buildUrlForTable(){
         return BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME_BOOKS).build();
+    }
+
+    public static final Uri buildUriForArchived(){
+        return BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME_BOOKS).appendPath(STATUS_ARCHIVED_STRING).build();
+    }
+
+    public static final Uri buildUriForCurrent(){
+        return BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME_BOOKS).appendPath(STATUS_CURRENT_STRING).build();
     }
 
     public static final Uri buildUriForBookDetails(String bookId){

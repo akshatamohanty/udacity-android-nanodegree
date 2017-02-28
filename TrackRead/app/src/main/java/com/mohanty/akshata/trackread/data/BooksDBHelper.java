@@ -127,6 +127,11 @@ public class BooksDBHelper extends SQLiteOpenHelper{
         return cursor;
     }
 
+    public boolean addNote(String bookId, ContentValues cv) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.update(BooksContract.TABLE_NAME_BOOKS, cv, BooksContract.BookEntry.COLUMN_NAME_BOOK_ID + "=" + bookId, null) > 0;
+    }
+
     // Deleting a book based on book id
     public long deleteBook(String bookId){
         SQLiteDatabase db = this.getWritableDatabase();

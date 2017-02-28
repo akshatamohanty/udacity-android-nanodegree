@@ -26,8 +26,8 @@ public class BooksContentProvider extends ContentProvider {
 
     private static final UriMatcher uriMatcher =  new UriMatcher(UriMatcher.NO_MATCH);
     static{
-        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS, ARCHIVED_BOOKS);
-        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS, CURRENT_BOOKS);
+        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS + "/" + BooksContract.STATUS_ARCHIVED_STRING, ARCHIVED_BOOKS);
+        uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS + "/" + BooksContract.STATUS_CURRENT_STRING, CURRENT_BOOKS);
         uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS, ALL_BOOKS);
         uriMatcher.addURI(BooksContract.CONTENT_AUTHORITY, BooksContract.TABLE_NAME_BOOKS + "/*", ALL_BOOKS_ITEM);
     }
@@ -72,7 +72,7 @@ public class BooksContentProvider extends ContentProvider {
 
         try{
             cursor.setNotificationUri(getContext().getContentResolver(), uri);
-            Log.v(LOG_TAG, "Query URI-" + uri.toString());
+            //Log.v(LOG_TAG, "Query URI-" + uri.toString());
         }
         catch (NullPointerException e){
             Log.v(LOG_TAG, "Null Pointer Exception at Query");
@@ -121,7 +121,7 @@ public class BooksContentProvider extends ContentProvider {
 
 
         getContext().getContentResolver().notifyChange(uri, null);
-        Log.v(LOG_TAG, "Notifying uri (bulkInsert) - " + uri.toString());
+        //Log.v(LOG_TAG, "Notifying uri (bulkInsert) - " + uri.toString());
         return numInserted;
     }
 
@@ -156,11 +156,29 @@ public class BooksContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
 
-        try{
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
-        catch (NullPointerException e){
-            Log.v(LOG_TAG, "Null Pointer Exception at Insert");
+        String bookId;
+
+        switch (uriMatcher.match(uri)) {
+
+            case ALL_BOOKS_ITEM:
+                bookId = uri.getLastPathSegment();
+                try{
+                    Log.v(LOG_TAG, "Notifying uri (updated item) - " + uri.toString());
+                    if(mDBHelper.addNote(bookId, contentValues)){
+                        getContext().getContentResolver().notifyChange(uri, null);
+                        getContext().getContentResolver().notifyChange(BooksContract.buildUriForCurrent(), null);
+                        getContext().getContentResolver().notifyChange(BooksContract.buildUriForArchived(), null);
+                        return 1;
+                    }
+                }
+                catch (NullPointerException e){
+                    Log.v(LOG_TAG, "Null Pointer Exception at Insert");
+                }
+                break;
+
+            default:
+                Log.v("Invalid-URI", uri.toString());
+
         }
 
         return 0;

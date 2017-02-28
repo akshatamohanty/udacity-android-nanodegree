@@ -2,12 +2,42 @@
     <string name="app_name">TrackRead</string>
     <string name="content_authority">com.mohanty.akshata.trackread</string>
 
+
+    <!-- AdMob ad unit IDs -->
+    <string name="ad_size">BANNER</string>
+    <string name="banner_home_footer">ca-app-pub-6497587057463238/4443684308</string>
+
+    <string name="goodreads_url">https://www.goodreads.com/search/index.xml</string>
+
+    <string-array name="book_backgrounds">
+        <item>https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkURbJjjTSk-neL6qxiN_GXJ-LNprD0swLISLpZWRaOOUMOQ75</item>
+        <item>https://cdn.pixabay.com/photo/2013/10/02/22/57/book-190034_960_720.jpg</item>
+        <item>http://www.publicdomainpictures.net/pictures/180000/velka/books-on-white-1465834942yVU.jpg</item>
+        <item>https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTAKGPNQEjrdU0I25KYzOCHS_oAT5fOHuTGz0DnjxbUUBY8wKS</item>
+        <item>https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQg_bjYcFOHA-A8k6Zuky3fJEP4ygINXCyw_xspTycdxnjPY8XV</item>
+    </string-array>
+
     <!--- Search Activity -->
     <string name="search_btn_text">Search</string>
     <string name="search_heading">What\'s your current read?</string>
+    <string name="btn_search">Search</string>
 
-    <string name="menu_statistics">Statistics</string>
+    <string name="search_results_heading">Search Results</string>
+
+
+    <string name="menu_statistics">Archives</string>
     <string name="menu_addBook">Add a book</string>
 
+    <string name="action_addNote">Add a note</string>
+    <string name="menu_archive">Add book to archive</string>
+
     <string name="network_toast">Please check your internet connection and try again.</string>
+
+    <string name="no_books_message">No books in the database.</string>
+    <string name="note_added">Note added</string>
+    <string name="note_cancel_message">Note discarded</string>
+    <string name="error_message">Error Occurred!</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "1033413302830",
+    "project_id": "trackread"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033413302830:android:9540463bdbea68cd",
+        "android_client_info": {
+          "package_name": "com.mohanty.akshata.trackread"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVje4zXfEz7_I66oGQl8ErW0ZSUl9NeBQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-92742017-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

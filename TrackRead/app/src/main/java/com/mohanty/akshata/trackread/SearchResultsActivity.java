@@ -7,12 +7,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.mohanty.akshata.trackread.data.BooksContract;
 
@@ -32,6 +31,11 @@ public class SearchResultsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Bundle b = getIntent().getExtras();
         String books = b.getString("books");
 
@@ -48,6 +52,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         // Get ListView object from xml
         final ListView listView = (ListView) findViewById(R.id.results);
+        listView.setItemsCanFocus(true);
 
         // Defined Array values to show in ListView
         String[] values = new String[booksArray.length()];
@@ -56,16 +61,9 @@ public class SearchResultsActivity extends AppCompatActivity {
             JSONObject book = (JSONObject) booksArray.get(i);
             String title = book.getJSONObject("best_book").getString("title");
             String author = book.getJSONObject("best_book").getJSONObject("author").getString("name");
-            //String img = book.getJSONObject("best_book").getString("image_url");
-            String res = title + " - By " + author;
+            String res = title + "\nBy: " + author;
             values[i] = res;
         }
-
-        // Define a new Adapter
-        // First parameter - Context
-        // Second parameter - Layout for the row
-        // Third parameter - ID of the TextView to which the data is written
-        // Forth - the Array of data
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, android.R.id.text1, values);
@@ -84,9 +82,6 @@ public class SearchResultsActivity extends AppCompatActivity {
                 // ListView Clicked item index
                 int itemPosition     = position;
 
-                // ListView Clicked item value
-                String  itemValue    = (String) listView.getItemAtPosition(position);
-
                 // Add item to database
                 try {
                     JSONObject clkBook = (JSONObject) booksArray.get(itemPosition);
@@ -95,14 +90,6 @@ public class SearchResultsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-
-                // Show Alert
-                Toast.makeText(getApplicationContext(),
-                        "Position :"+itemPosition+"  ListItem : " +itemValue , Toast.LENGTH_LONG)
-                        .show();
-
-
 
             }
 
@@ -130,13 +117,13 @@ public class SearchResultsActivity extends AppCompatActivity {
 
                 ContentValues books_values = new ContentValues();
                 books_values.put(BooksContract.BookEntry.COLUMN_NAME_BOOK_ID, id);
-                books_values.put(BooksContract.BookEntry.COLUMN_NAME_AUTHOR, id);
-                books_values.put(BooksContract.BookEntry.COLUMN_NAME_CURRENT_PAGE, id);
+                books_values.put(BooksContract.BookEntry.COLUMN_NAME_AUTHOR, author);
+                books_values.put(BooksContract.BookEntry.COLUMN_NAME_TITLE, title);
                 books_values.put(BooksContract.BookEntry.COLUMN_NAME_DATE_ADDED, (new Date()).toString());
                 books_values.put(BooksContract.BookEntry.COLUMN_NAME_IMAGE, image_url);
                 books_values.put(BooksContract.BookEntry.COLUMN_NAME_NOTES, "");
                 books_values.put(BooksContract.BookEntry.COLUMN_NAME_STATUS, BooksContract.STATUS_CURRENT);
-                books_values.put(BooksContract.BookEntry.COLUMN_NAME_TITLE, title);
+                books_values.put(BooksContract.BookEntry.COLUMN_NAME_CURRENT_PAGE, "0");
                 books_values.put(BooksContract.BookEntry.COLUMN_NAME_TOTAL_PAGES, "0");
 
                 if( mResolver.insert(uri, books_values) != null ){
@@ -145,7 +132,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
             }
             catch(JSONException e){
-                Log.v(LOG_TAG, "JSON-Exception");
+                //Log.v(LOG_TAG, "JSON-Exception");
             }
 
             return false;
@@ -159,11 +146,11 @@ public class SearchResultsActivity extends AppCompatActivity {
             Bundle b = new Bundle();
 
             if(result){
-                b.putString("book", "book saved");
+                b.putBoolean("new", true);
                 obj_intent.putExtras(b);
             }
             else{
-                b.putString("book", "error saving book");
+                b.putBoolean("new", true);
                 obj_intent.putExtras(b);
             }
 
