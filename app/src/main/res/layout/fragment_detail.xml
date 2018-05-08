@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/detailsRelativeLayout">
+
+            <android.support.design.widget.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/AppTheme.AppBarOverlay"
+                android:id="@+id/textView">
+
+            </android.support.design.widget.AppBarLayout>
+
+            <!-- Movie Title Bar -->
+            <TextView
+                android:id="@+id/movie_title"
+                tools:text="@string/LoremIpsum"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_below="@+id/textView"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@color/accent_material_light"
+                android:height="@dimen/movie_title_height"
+                android:paddingTop="@dimen/movie_title_top_bottom_padding"
+                android:paddingBottom="@dimen/movie_title_top_bottom_padding"
+                android:paddingRight="@dimen/movie_title_left_right_padding"
+                android:paddingLeft="@dimen/movie_title_left_right_padding"
+                android:textColor="@color/abc_primary_text_disable_only_material_dark"
+                android:textSize="@dimen/movie_title_text_height" />
+
+            <!-- Movie Image -->
+            <ImageView
+                android:id="@+id/movie_poster"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/movie_title"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"
+                android:layout_toLeftOf="@+id/movie_rating"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"/>
+
+
+            <!-- Movie Rating -->
+            <TextView
+                android:id="@+id/movie_rating"
+                tools:text="@string/LoremIpsum"
+                android:layout_width="@dimen/details_width"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/movie_title"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"
+                android:layout_centerInParent="true" />
+
+            <!-- Movie Release Date -->
+            <TextView
+                android:id="@+id/movie_releaseDate"
+                tools:text="@string/LoremIpsum"
+                android:layout_width="@dimen/details_width"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/movie_rating"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"/>
+
+            <!-- Movie Plot -->
+            <TextView
+                android:id="@+id/movie_plotsynopsis"
+                tools:text="@string/LoremIpsum"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/movie_poster"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"/>
+
+            <!-- Save Movie Button -->
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:maxWidth="@dimen/details_width"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/movie_releaseDate"
+                android:text="@string/save_label"
+                android:id="@+id/save"
+                android:layout_alignRight="@+id/movie_releaseDate"
+                android:layout_alignEnd="@+id/movie_releaseDate"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"/>
+
+            <!--- This is the fragment with the videos listing -->
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/fragment_videos"
+                android:layout_below="@id/movie_plotsynopsis"
+                android:name="com.android.akshatamohanty.popularmovies.VideosFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout="@layout/fragment_videos"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"/>
+
+            <!--- This is the main fragment with the reviews listing -->
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/fragment_reviews"
+                android:layout_below="@id/fragment_videos"
+                android:name="com.android.akshatamohanty.popularmovies.ReviewsFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout="@layout/fragment_reviews"
+                android:layout_marginTop="@dimen/general_vertical_margin"
+                android:layout_marginLeft="@dimen/general_horizontal_margin"
+                android:layout_marginRight="@dimen/general_horizontal_margin"
+                android:layout_marginBottom="@dimen/general_vertical_margin"/>
+
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>

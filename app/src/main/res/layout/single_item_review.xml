@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<!--
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/go_to_review"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/general_vertical_margin"
+        android:layout_marginRight="@dimen/general_horizontal_margin"
+        android:layout_marginBottom="@dimen/general_vertical_margin"
+        android:layout_centerInParent="true"
+        android:background="@drawable/ic_near_me_black_16dp"/>-->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:layout_weight="4"
+        android:id="@+id/single_review"
+        android:textSize="@dimen/movie_add_details_height"
+        android:layout_marginTop="@dimen/general_vertical_margin"
+        android:layout_marginRight="@dimen/general_horizontal_margin"
+        android:layout_marginBottom="@dimen/general_vertical_margin"
+        android:layout_centerInParent="true"/>
+
+
+</LinearLayout>
